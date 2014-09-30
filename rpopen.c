@@ -43,11 +43,11 @@ int conn(char *host, int port){
 		return 0;
 	}
 
-	//setup struct myaddr
+	//setup our address 
 	memset((char*)&myaddr, 0, sizeof(myaddr));		//0s the struct
 	myaddr.sin_family = AF_INET;		//family = AF_INET
-	myaddr.sin_addr.s_addr = htonl(INADDR_ANY);	//INADDR_ANY = 0.0.0.0 host to network (long)
-	myaddr.sin_port = htons(0);		//port = 0 host to network (short)
+	myaddr.sin_addr.s_addr = htonl(INADDR_ANY);	//INADDR_ANY = 0.0.0.0, host to network (long)
+	myaddr.sin_port = htons(0);		//port = 0, host to network (short)
 	
 	//bind socket
 	//bind(int socket, const struct sockaddr *address, socklen_t address_len)
@@ -65,8 +65,12 @@ int conn(char *host, int port){
 	printf("local port number = %d\n", ntohs(myaddr.sin_port));
 	//end debug
 	
+	//setup server address	
+	memset((char*)&servaddr, 0, sizeof(servaddr));		//0s the struct
+	servaddr.sin_family = AF_INET;		//family = AF_INET
+	servaddr.sin_port = htons(port);		//port = port of server, host to network (short) 
 	
-	
+
 	
 	return 0;
 }
