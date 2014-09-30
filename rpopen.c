@@ -70,9 +70,21 @@ int conn(char *host, int port){
 	servaddr.sin_family = AF_INET;		//family = AF_INET
 	servaddr.sin_port = htons(port);		//port = port of server, host to network (short) 
 	
-
+	hp = gethostbyname(host);
+	if (!hp){
+		fprintf(stderr, "could not obtain address of %s\n", host);
+		return 0;
+	}
 	
-	return 0;
+	//put host address into server address struct
+	memcpy((void *)&servaddr.sin_addr, hp->h_addr_list[0], hp->h_length);
+
+	//connect to server
+	if (connect(fd, (struct sockaddr *)&servaddr, sizeof(servaddr)) < 0){
+		perror("connect failed");
+		return 0;
+	}
+	return 1;
 }
 
 void disconn(void){
