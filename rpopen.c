@@ -15,7 +15,20 @@ FILE* rpopen(char *host, int port, char *cmd);
 
 
 int main(){
-	printf("hello");	
+
+	extern char *optarg;
+	extern int optind;
+	int c, err = 0;
+	char *prompt = 0;
+	int port = 3706;
+	char *host = "localhost";
+	static char usage[] = "usage: %s [-d] [-h serverhost] [-p port]\n";
+
+	conn(host, port);
+	disconn();
+
+
+	printf("hello");
 	return 0;
 }
 
