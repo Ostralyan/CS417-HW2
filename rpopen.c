@@ -9,10 +9,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#include "port.h"
+
 int conn(char *host, int port);
 void disconn(void);
 FILE* rpopen(char *host, int port, char *cmd);
 
+int fd;
 
 int main(){
 
@@ -20,11 +23,25 @@ int main(){
 	extern int optind;
 	int c, err = 0;
 	char *prompt = 0;
-	int port = 3706;
+	int port = SERVICE_PORT;
 	char *host = "localhost";
 	static char usage[] = "usage: %s [-d] [-h serverhost] [-p port]\n";
 
 	conn(host, port);
+	
+	//NEW
+	char test[] = "THIS IS A REALLYL ONG STRING THAT I AM GOING TO SEND";
+	write(fd, test, strlen(test));
+	
+	FILE *fp;
+	fp = fdopen(fd, "r");
+	#define BSIZE 1024
+	char buf[BSIZE];
+	while(fgets(buf, BSIZE, fp) != 0){
+		printf("Recieved: \"%s\"\n", buf);
+	}
+	//END NEW
+
 	disconn();
 
 
@@ -35,9 +52,6 @@ FILE *rpopen(char *host, int port, char *cmd){
 
 	return 0;
 }
-
-
-int fd;
 
 int conn(char *host, int port){
 	
@@ -102,5 +116,5 @@ int conn(char *host, int port){
 void disconn(void){
 
 	printf("disconn()\n");
-	close(fd);
+	shutdown(fd, 2);
 }

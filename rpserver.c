@@ -8,6 +8,8 @@
 #include <sys/errno.h>
 #include <sys/wait.h>
 
+#include "port.h"
+
 #ifndef ERESTART
 #define ERESTART EINTR
 #endif
@@ -15,13 +17,15 @@
 extern int errno;
 
 void serve(int port);
+void send_message(int sock);
+void receive_message(int sock);
 
-main(int argc, char **argv)
+int main(int argc, char **argv)
 {
 	extern char *optarg;
 	extern int optind;
 	int c, err = 0; 
-	int port = 3706;
+	int port = SERVICE_PORT;
 	static char usage[] = "usage: %s [-d] [-p port]\n";
 
 	while ((c = getopt(argc, argv, "dp:")) != -1)
@@ -104,6 +108,48 @@ void serve(int port){
 
 		printf("received a connection from: %s port %d\n",
 			inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
-        	shutdown(rqst, 2); //close connection
+	
+		//NEW	
+		//test messages
+		receive_message(rqst);		
+		send_message(rqst);
+		
+		//Forks here
+		int pid;
+		switch (pid = fork()){
+		case -1:
+			fprintf(stderr, "fork failed!\n");
+			exit(1);
+		default:
+			close(rqst);
+			return;
+		case 0:
+			break;
+		}
+		printf("hello\n");
+		printf("The PID of this process is %d\n", pid);
+		//END NEW
+        shutdown(rqst, 2); //close connection
 	}
+}
+
+//This function receives the message
+void receive_message(int sock){
+	#define BSIZE 1024
+	char buf[BSIZE];
+	int nbytes;
+
+	if ((nbytes = read(sock, buf, BSIZE)) < 0){
+		fprintf(stderr, "no command from client!\n");
+	//	exit(1);
+	}
+	else{
+		printf("recieved: \"%s\"\n", buf);	
+	}
+}
+
+//This function sends the message
+void send_message(int sock){
+	char *msg = "this is a test";
+	write(sock, msg, strlen(msg));
 }
