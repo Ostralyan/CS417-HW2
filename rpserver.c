@@ -1,15 +1,12 @@
-/*
-	rpserver: remote popen server
-*/
-
+//rpserver: remote popen server
 #include <stdio.h>
-#include <stdlib.h>	/* needed for os x */
-#include <string.h>	/* for memset */
+#include <stdlib.h>
+#include <string.h>
 #include <sys/socket.h>
-#include <arpa/inet.h>	/* for inet_ntoa */
+#include <arpa/inet.h>
 #include <netinet/in.h>
-#include <sys/errno.h>   /* defines ERESTART, EINTR */
-#include <sys/wait.h>    /* defines WNOHANG, for wait() */
+#include <sys/errno.h>
+#include <sys/wait.h>
 
 #ifndef ERESTART
 #define ERESTART EINTR
@@ -17,7 +14,7 @@
 
 extern int errno;
 
-void serve(int port);	/* main server function */
+void serve(int port);
 
 main(int argc, char **argv)
 {
@@ -48,74 +45,57 @@ main(int argc, char **argv)
 	serve(port);
 }
 
-/* serve: set up the service */
-
-void
-serve(int port)
-{
-	int svc;        /* listening socket providing service */
-	int rqst;       /* socket accepting the request */
-	socklen_t alen;       /* length of address structure */
-	struct sockaddr_in my_addr;    /* address of this service */
-	struct sockaddr_in client_addr;  /* client's address */
+void serve(int port){
+    
+	int svc;        //socket listening
+	int rqst;       //socket accepting request
+	socklen_t alen;       //length of address
+	struct sockaddr_in my_addr;    //server address
+	struct sockaddr_in client_addr;  //client address
 	int sockoptval = 1;
-	char hostname[128]; /* host name, for debugging */
+	char hostname[128];
 
+    //our hostname eg. luke's air
 	gethostname(hostname, 128);
-
-	/* get a tcp/ip socket */
-	/*   AF_INET is the Internet address (protocol) family  */
-	/*   with SOCK_STREAM we ask for a sequenced, reliable, two-way */
-	/*   conenction based on byte streams.  With IP, this means that */
-	/*   TCP will be used */
-
+    
+    //create tcp/ip socket
+    //socket(domain, type, protocol)
 	if ((svc = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
 		perror("cannot create socket");
 		exit(1);
 	}
-
-	/* we use setsockopt to set SO_REUSEADDR. This allows us */
-	/* to reuse the port immediately as soon as the service exits. */
-	/* Some operating systems will not allow immediate reuse */
-	/* on the chance that some packets may still be en route */
-	/* to the port. */
-
+    
+    //allows us to reuse port immediately after the service exits
 	setsockopt(svc, SOL_SOCKET, SO_REUSEADDR, &sockoptval, sizeof(int));
 
-	/* set up our address */
-	/* htons converts a short integer into the network representation */
-	/* htonl converts a long integer into the network representation */
-	/* INADDR_ANY is the special IP address 0.0.0.0 which binds the */
-	/* transport endpoint to all IP addresses on the machine. */
-
+    //setup our address
 	memset((char*)&my_addr, 0, sizeof(my_addr));  /* 0 out the structure */
 	my_addr.sin_family = AF_INET;   /* address family */
 	my_addr.sin_port = htons(port);
 	my_addr.sin_addr.s_addr = htonl(INADDR_ANY);
 
-	/* bind to the address to which the service will be offered */
+	//bind address to socket
+    //bind(int socket, const struct sockaddr *address, socklen_t address_len)
 	if (bind(svc, (struct sockaddr *)&my_addr, sizeof(my_addr)) < 0) {
 		perror("bind failed");
 		exit(1);
 	}
 
-	/* set up the socket for listening with a queue length of 5 */
+	//listen, max queue = 5
 	if (listen(svc, 5) < 0) {
 		perror("listen failed");
 		exit(1);
 	}
-
+    
 	printf("server started on %s, listening on port %d\n", hostname, port);
 
 	/* loop forever - wait for connection requests and perform the service */
-	alen = sizeof(client_addr);     /* length of address */
+	alen = sizeof(client_addr);     //length of address
 
 	for (;;) {
 		while ((rqst = accept(svc,
 		                (struct sockaddr *)&client_addr, &alen)) < 0) {
-			/* we may break out of accept if the system call */
-			/* was interrupted. In this case, loop back and */
-			/* try again */
+            //break if syscall was interrupted
 			if ((errno != ECHILD) && (errno != ERESTART) && (errno != EINTR)) {
 				perror("accept failed");
 				exit(1);
@@ -124,6 +104,6 @@ serve(int port)
 
 		printf("received a connection from: %s port %d\n",
 			inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
-        	shutdown(rqst, 2);    /* close the connection */
+        	shutdown(rqst, 2); //close connection
 	}
 }

@@ -28,7 +28,6 @@ int main(){
 	disconn();
 
 
-	printf("hello");
 	return 0;
 }
 
