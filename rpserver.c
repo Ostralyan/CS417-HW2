@@ -19,6 +19,7 @@ extern int errno;
 void serve(int port);
 void send_message(int sock);
 void receive_message(int sock);
+void receive_command(int sock);
 
 int main(int argc, char **argv)
 {
@@ -113,29 +114,40 @@ void serve(int port){
 		//test messages
 		receive_message(rqst);		
 		send_message(rqst);
-		
-		//Forks here
-		int pid;
-		switch (pid = fork()){
-		case -1:
-			fprintf(stderr, "fork failed!\n");
-			exit(1);
-		default:
-			close(rqst);
-			return;
-		case 0:
-			break;
-		}
-		printf("hello\n");
-		printf("The PID of this process is %d\n", pid);
-		//END NEW
+	
+		//END NEW	
+		printf("closing socket %d\n", rqst);
         shutdown(rqst, 2); //close connection
 	}
 }
 
+
+void receive_command(int sock){
+
+	char command[BSIZE];
+	
+	switch(fork()){
+	case -1:
+		fprintf(stderr, "fork failed!\n");
+		exit(1);
+	default:
+		printf("closing socket %d\n", sock);
+		shutdown(sock, 2);
+		return;
+	case 0:
+		printf("in the child\n");
+		break;
+	}
+	
+	
+	close(0);
+	close(1);
+	dup2(sock, 1);
+}
+
+
 //This function receives the message
 void receive_message(int sock){
-	#define BSIZE 1024
 	char buf[BSIZE];
 	int nbytes;
 
