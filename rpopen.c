@@ -30,7 +30,8 @@ int main(){
 	conn(host, port);
 	
 	//NEW
-	char test[] = "THIS IS A REALLYL ONG STRING THAT I AM GOING TO SEND";
+	char test[] = "ls -lL /etc"; 
+	
 	write(fd, test, strlen(test));
 	
 	FILE *fp;

@@ -112,19 +112,18 @@ void serve(int port){
 	
 		//NEW	
 		//test messages
-		receive_message(rqst);		
-		send_message(rqst);
-	
+		//receive_message(rqst);		
+		//send_message(rqst);
+		//END TEST
+		receive_command(rqst);	
 		//END NEW	
 		printf("closing socket %d\n", rqst);
-        shutdown(rqst, 2); //close connection
+        close(rqst); //close connection
 	}
 }
 
 
-void receive_command(int sock){
-
-	char command[BSIZE];
+void receive_command(int sock){	
 	
 	switch(fork()){
 	case -1:
@@ -132,17 +131,39 @@ void receive_command(int sock){
 		exit(1);
 	default:
 		printf("closing socket %d\n", sock);
-		shutdown(sock, 2);
+		close(sock);
 		return;
 	case 0:
 		printf("in the child\n");
 		break;
 	}
 	
-	
+	char command[BSIZE];
+	int nbytes;
+
+	if ((nbytes = read(sock, command, BSIZE)) < 0){
+		fprintf(stderr, "no command from received from client\n");
+	}
+	//debug
+	else{
+		command[nbytes] = 0;
+		printf("The awesome command received was \"%s\"\n", command);		
+		close(0);
+		close(1);
+		dup2(sock, 1);
+		execlp("/bin/sh", "/bin/sh", "-c", command, (char*)0);
+		fprintf(stderr, "Unknown command: %s", command);
+		exit(1);
+	}
+	//end debug
+/*
 	close(0);
 	close(1);
 	dup2(sock, 1);
+	execlp("/bin/sh", "/bin/sh", "-c", command, (char*)0);
+	fprintf(stderr, "Unknown command: %s", command);
+	exit(1);
+*/
 }
 
 
