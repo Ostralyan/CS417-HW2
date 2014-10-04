@@ -27,16 +27,17 @@ int main(){
 	char *host = "localhost";
 	static char usage[] = "usage: %s [-d] [-h serverhost] [-p port]\n";
 
+
+/*	TESTING
+
 	conn(host, port);
 	
 	//NEW
 	char test[] = "ls -lL /etc"; 
-	
 	write(fd, test, strlen(test));
 	
 	FILE *fp;
 	fp = fdopen(fd, "r");
-	#define BSIZE 1024
 	char buf[BSIZE];
 	while(fgets(buf, BSIZE, fp) != 0){
 		printf("Recieved: \"%s\"\n", buf);
@@ -45,12 +46,25 @@ int main(){
 
 	disconn();
 
+*/	char *cmd = "ls -lL /etc";
+	rpopen(host, port, cmd);
+
 
 	return 0;
 }
 
 FILE *rpopen(char *host, int port, char *cmd){
+	conn(host, port);
+	write(fd, cmd, strlen(cmd));
 
+	FILE *fp;
+	fp = fdopen(fd, "r");
+	char buf[BSIZE];
+	while(fgets(buf, BSIZE, fp) != 0){
+		printf("%s", buf);
+	}
+		
+	disconn();
 	return 0;
 }
 

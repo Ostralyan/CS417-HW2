@@ -140,12 +140,17 @@ void receive_command(int sock){
 	
 	char command[BSIZE];
 	int nbytes;
-
-	if ((nbytes = read(sock, command, BSIZE)) < 0){
+	
+	nbytes = read(sock, command, BSIZE);
+	if (nbytes < 0){
 		fprintf(stderr, "no command from received from client\n");
 	}
-	//debug
+	else if(nbytes == 0){
+		printf("no arguement recieved from client\n");
+		exit(1);
+	}
 	else{
+		printf("%d", nbytes);
 		command[nbytes] = 0;
 		printf("The awesome command received was \"%s\"\n", command);		
 		close(0);
@@ -155,15 +160,6 @@ void receive_command(int sock){
 		fprintf(stderr, "Unknown command: %s", command);
 		exit(1);
 	}
-	//end debug
-/*
-	close(0);
-	close(1);
-	dup2(sock, 1);
-	execlp("/bin/sh", "/bin/sh", "-c", command, (char*)0);
-	fprintf(stderr, "Unknown command: %s", command);
-	exit(1);
-*/
 }
 
 
