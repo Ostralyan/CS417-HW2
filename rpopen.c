@@ -17,53 +17,23 @@ FILE* rpopen(char *host, int port, char *cmd);
 
 int fd;
 
-int main(){
-
-	extern char *optarg;
-	extern int optind;
-	int c, err = 0;
-	char *prompt = 0;
-	int port = SERVICE_PORT;
-	char *host = "localhost";
-	static char usage[] = "usage: %s [-d] [-h serverhost] [-p port]\n";
-
-
-/*	TESTING
-
-	conn(host, port);
-	
-	//NEW
-	char test[] = "ls -lL /etc"; 
-	write(fd, test, strlen(test));
-	
-	FILE *fp;
-	fp = fdopen(fd, "r");
-	char buf[BSIZE];
-	while(fgets(buf, BSIZE, fp) != 0){
-		printf("Recieved: \"%s\"\n", buf);
-	}
-	//END NEW
-
-	disconn();
-
-*/	char *cmd = "ls -lL /etc";
-	rpopen(host, port, cmd);
-
-
-	return 0;
-}
-
 FILE *rpopen(char *host, int port, char *cmd){
+	
+	if(cmd == ""){
+		printf("empty string");
+		exit(1);
+	}
+
 	conn(host, port);
 	write(fd, cmd, strlen(cmd));
-
+	
 	FILE *fp;
 	fp = fdopen(fd, "r");
 	char buf[BSIZE];
 	while(fgets(buf, BSIZE, fp) != 0){
 		printf("%s", buf);
 	}
-		
+	
 	disconn();
 	return 0;
 }
@@ -74,6 +44,27 @@ int conn(char *host, int port){
 	unsigned int alen;		//address length of port num
 	struct sockaddr_in myaddr;		//our address
 	struct sockaddr_in servaddr;	//server address
+	
+	if(port == 0){
+		char* envPort;
+		envPort = getenv("PPORT");
+		if (envPort == NULL){
+			port = SERVICE_PORT;
+		}
+		else{
+			port = atoi(envPort);
+		}
+	}
+	if (host == NULL || host ==""){
+		char* envHost;
+		envHost = getenv("PHOST");
+		if (envHost == NULL){
+			host = "localhost";
+		}
+		else{
+			host = envHost;
+		}
+	}
 
 	printf("conn(host=\"%s\", port=\"%d\")\n", host, port);
 
@@ -105,11 +96,13 @@ int conn(char *host, int port){
 	}
 	printf("local port number = %d\n", ntohs(myaddr.sin_port));
 	//end debug
-	
+
+		
 	//setup server address	
 	memset((char*)&servaddr, 0, sizeof(servaddr));		//0s the struct
 	servaddr.sin_family = AF_INET;		//family = AF_INET
 	servaddr.sin_port = htons(port);		//port = port of server, host to network (short) 
+	
 	
 	hp = gethostbyname(host);
 	if (!hp){
@@ -125,6 +118,7 @@ int conn(char *host, int port){
 		perror("connect failed");
 		return 0;
 	}
+	
 	return 1;
 }
 

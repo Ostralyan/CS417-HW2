@@ -17,8 +17,6 @@
 extern int errno;
 
 void serve(int port);
-void send_message(int sock);
-void receive_message(int sock);
 void receive_command(int sock);
 
 int main(int argc, char **argv)
@@ -27,26 +25,38 @@ int main(int argc, char **argv)
 	extern int optind;
 	int c, err = 0; 
 	int port = SERVICE_PORT;
-	static char usage[] = "usage: %s [-d] [-p port]\n";
-
-	while ((c = getopt(argc, argv, "dp:")) != -1)
-		switch (c) {
-		case 'p':
-			port = atoi(optarg);
-			/* if (port < 1024 || port > 65535) { */
-			if (port < 0 || port > 65535) {
-				fprintf(stderr, "invalid port number: %s\n", optarg);
-				err = 1;
+	static char usage[] = "usage: %s [-p port]\n";
+	
+	if (argc == 3){
+		if (strcmp(argv[1],"-p")==0){
+			if (atoi(argv[2])!=0){
+				port = atoi(argv[2]);
 			}
-			break;
-		case '?':
-			err = 1;
-			break;
+			else{
+				fprintf(stderr, usage, argv[0]);
+				exit(1);
+			}
 		}
-	if (err || (optind < argc)) {
+		else{
+			fprintf(stderr, usage, argv[0]);
+			exit(1);
+		}
+	}
+	else if (argc == 1){
+		char* envPort;
+		envPort = getenv("PPORT");
+		if (envPort == NULL){
+			port = SERVICE_PORT;
+		}
+		else{
+			port = atoi(envPort);
+		}
+	}
+	else{
 		fprintf(stderr, usage, argv[0]);
 		exit(1);
 	}
+
 	serve(port);
 }
 
@@ -110,10 +120,6 @@ void serve(int port){
 		printf("received a connection from: %s port %d\n",
 			inet_ntoa(client_addr.sin_addr), ntohs(client_addr.sin_port));
 	
-		//NEW	
-		//test messages
-		//receive_message(rqst);		
-		//send_message(rqst);
 		//END TEST
 		receive_command(rqst);	
 		//END NEW	
@@ -124,17 +130,15 @@ void serve(int port){
 
 
 void receive_command(int sock){	
-	
+
+		
 	switch(fork()){
 	case -1:
 		fprintf(stderr, "fork failed!\n");
 		exit(1);
 	default:
-		printf("closing socket %d\n", sock);
-		close(sock);
 		return;
 	case 0:
-		printf("in the child\n");
 		break;
 	}
 	
@@ -142,6 +146,7 @@ void receive_command(int sock){
 	int nbytes;
 	
 	nbytes = read(sock, command, BSIZE);
+	
 	if (nbytes < 0){
 		fprintf(stderr, "no command from received from client\n");
 	}
@@ -150,35 +155,14 @@ void receive_command(int sock){
 		exit(1);
 	}
 	else{
-		printf("%d", nbytes);
 		command[nbytes] = 0;
-		printf("The awesome command received was \"%s\"\n", command);		
+		printf("command: \"%s\"\n", command);		
 		close(0);
 		close(1);
 		dup2(sock, 1);
 		execlp("/bin/sh", "/bin/sh", "-c", command, (char*)0);
-		fprintf(stderr, "Unknown command: %s", command);
+		fprintf(stderr, "uasdfnknown command: %s", command);
 		exit(1);
 	}
 }
 
-
-//This function receives the message
-void receive_message(int sock){
-	char buf[BSIZE];
-	int nbytes;
-
-	if ((nbytes = read(sock, buf, BSIZE)) < 0){
-		fprintf(stderr, "no command from client!\n");
-	//	exit(1);
-	}
-	else{
-		printf("recieved: \"%s\"\n", buf);	
-	}
-}
-
-//This function sends the message
-void send_message(int sock){
-	char *msg = "this is a test";
-	write(sock, msg, strlen(msg));
-}
