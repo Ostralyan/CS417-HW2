@@ -1,2 +1,2 @@
-#define SERVICE_PORT	3709
+#define SERVICE_PORT	3706
 #define BSIZE	8192
