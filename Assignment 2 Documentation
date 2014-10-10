@@ -1,4 +1,4 @@
-Luke Xu
+Luke Xu : 134003706
 Utkarsha Mavani
 198:417 
 Assignment 2 Documentation
@@ -6,19 +6,21 @@ Assignment 2 Documentation
 
 We are submitting the following documents:
 1. rpopen.c  file contains code for ropen function. The ropen function uses sockets at the operating systems level to allow a program to open the output stream of a remote program
-2.rpopen-demo.c file is a demo program that uses ropen function
-3.rpserver.c file is a server file for the server program. The server continuiously loops waiting for connections.
-4. port.h file specifies the defines the service port and the buffer size
+2. rpopen-demo.c file is a demo program that uses ropen function
+3. rpserver.c file is a server file for the server program. The server continuiously loops waiting for connections.
+4. port.h file specifies the defines the service port (default port)
 5. Makefile file assumes that all ropen.c is a client logic program and the server is in the a file called rpserver.c The make will also build a demo client called ropen-demo from a file called ropen-demo.c. Makefile will compile the executable versions of ropen.c, ropen-demo.c, and rpserver.c.
 
 
  How to compile and run the code:
-1.cd into the folder
-2.run make
-3.export PPORT=port_of_server
-4.export PHOST=name_of_server
-5../rpserver
-6../rpopen-demo
+1. cd into the folder
+2. $make
+3. $export PPORT=port_of_server
+4. $export PHOST=name_of_server
+5. $./rpserver
+6. $./rpopen-demo
+7. also supports ./rpserver [-p port] but on client side PPORT must be specified
+8. if not host or ports are specified, default host = "localhost" & default port = SERVICE_PORT from port.h
 
 Tests ran to validate the software:
 The software runs with the rpope-demo.c file. It also works in the case of reading empty messages.
