@@ -1,5 +1,7 @@
 #include <stdio.h>
 #define BSIZE 1024
+//Luke Xu : 134003706
+//Utkarsha Mavani
 
 FILE *rpopen(char *host, int port, char *cmd);
 
