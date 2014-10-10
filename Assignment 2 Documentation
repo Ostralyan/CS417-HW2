@@ -5,11 +5,11 @@ Assignment 2 Documentation
 
 
 We are submitting the following documents:
-1. rpopen.c  file contains code for ropen function. The ropen function uses sockets at the operating systems level to allow a program to open the output stream of a remote program
-2. rpopen-demo.c file is a demo program that uses ropen function
-3. rpserver.c file is a server file for the server program. The server continuiously loops waiting for connections.
+1. rpopen.c This processes the arguements and connects to the host passing in arguements to the remote server and reads the write back from server.
+2. rpopen-demo.c file Test file 
+3. rpserver.c Forks and execl's while listening to additional incoming clients. Processes the popen command on the server side and writes to client
 4. port.h file specifies the defines the service port (default port)
-5. Makefile file assumes that all ropen.c is a client logic program and the server is in the a file called rpserver.c The make will also build a demo client called ropen-demo from a file called ropen-demo.c. Makefile will compile the executable versions of ropen.c, ropen-demo.c, and rpserver.c.
+5. Makefile
 
 
  How to compile and run the code:
@@ -23,4 +23,7 @@ We are submitting the following documents:
 8. if not host or ports are specified, default host = "localhost" & default port = SERVICE_PORT from port.h
 
 Tests ran to validate the software:
-The software runs with the rpope-demo.c file. It also works in the case of reading empty messages.
+The software runs with the rpope-demo.c file. 
+It also works in the case of reading empty messages.
+./rpserver with no arguements goes to default
+./rpserver with -p port uses input as port but cannot modify ./rpopen-demo to match server port.
