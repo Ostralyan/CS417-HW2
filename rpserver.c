@@ -1,6 +1,4 @@
 //rpserver: remote popen server
-//Luke Xu : 134003706
-//Utkarsha Mavani
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
